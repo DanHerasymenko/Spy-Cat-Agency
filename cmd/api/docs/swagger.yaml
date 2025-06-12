@@ -1,0 +1,542 @@
+definitions:
+  model.Cat:
+    properties:
+      breed:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      salary:
+        type: number
+      updated_at:
+        type: string
+      years_experience:
+        type: integer
+    type: object
+  model.CatAssign:
+    properties:
+      cat_id:
+        type: integer
+    required:
+    - cat_id
+    type: object
+  model.CatCreate:
+    properties:
+      breed:
+        type: string
+      name:
+        type: string
+      salary:
+        minimum: 0
+        type: number
+      years_experience:
+        minimum: 0
+        type: integer
+    required:
+    - breed
+    - name
+    - salary
+    - years_experience
+    type: object
+  model.CatUpdate:
+    properties:
+      salary:
+        minimum: 0
+        type: number
+    required:
+    - salary
+    type: object
+  model.Mission:
+    properties:
+      cat:
+        $ref: '#/definitions/model.Cat'
+      cat_id:
+        type: integer
+      completed:
+        type: boolean
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      targets:
+        items:
+          $ref: '#/definitions/model.Target'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  model.MissionCreate:
+    properties:
+      cat_id:
+        type: integer
+      name:
+        type: string
+      targets:
+        items:
+          $ref: '#/definitions/model.TargetCreate'
+        maxItems: 3
+        minItems: 1
+        type: array
+    required:
+    - cat_id
+    - name
+    - targets
+    type: object
+  model.Target:
+    properties:
+      completed:
+        type: boolean
+      country:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      mission_id:
+        type: integer
+      name:
+        type: string
+      notes:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.TargetCreate:
+    properties:
+      country:
+        type: string
+      name:
+        type: string
+      notes:
+        type: string
+    required:
+    - country
+    - name
+    type: object
+  model.TargetUpdate:
+    properties:
+      completed:
+        type: boolean
+      notes:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: A spy cat management system API.
+  title: SpyCat Agency API
+  version: "1.0"
+paths:
+  /api/cats/{id}:
+    delete:
+      description: Remove a spy cat by ID
+      parameters:
+      - description: Cat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "204":
+          description: No content
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a spy cat
+      tags:
+      - Cats
+    get:
+      description: Retrieve a spy cat by ID
+      parameters:
+      - description: Cat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Cat'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a spy cat
+      tags:
+      - Cats
+  /api/cats/{id}/salary:
+    put:
+      consumes:
+      - application/json
+      description: Update salary of a spy cat by ID
+      parameters:
+      - description: Cat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update salary request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CatUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Cat'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update cat salary
+      tags:
+      - Cats
+  /api/cats/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new spy cat
+      parameters:
+      - description: CreateCat request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CatCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Cat'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new spy cat
+      tags:
+      - Cats
+  /api/cats/list:
+    get:
+      description: Retrieve a full list of all registered spy cats in the agency
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Cat'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all spy cats
+      tags:
+      - Cats
+  /api/missions:
+    get:
+      description: Get all created missions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Mission'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all missions
+      tags:
+      - Missions
+    post:
+      consumes:
+      - application/json
+      description: Create a mission with 1–3 targets
+      parameters:
+      - description: Mission create body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.MissionCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Mission'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new mission
+      tags:
+      - Missions
+  /api/missions/{id}:
+    delete:
+      description: Delete a mission by ID (only if not assigned to a cat)
+      parameters:
+      - description: Mission ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "204":
+          description: No content
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a mission
+      tags:
+      - Missions
+    get:
+      description: Retrieve mission details, including assigned cat and targets
+      parameters:
+      - description: Mission ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Mission'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get mission by ID
+      tags:
+      - Missions
+  /api/missions/{id}/assign:
+    post:
+      consumes:
+      - application/json
+      description: Assign a cat to a mission (1 cat per mission)
+      parameters:
+      - description: Mission ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Cat assign body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CatAssign'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Assign cat to mission
+      tags:
+      - Missions
+  /api/missions/{id}/targets:
+    post:
+      consumes:
+      - application/json
+      description: Add a target to an existing mission (only if mission is not completed)
+      parameters:
+      - description: Mission ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Target create body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.TargetCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Target'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add target to mission
+      tags:
+      - Missions
+  /api/missions/targets/{id}:
+    delete:
+      description: Delete a target by ID (only if target is not completed)
+      parameters:
+      - description: Target ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "204":
+          description: No content
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete target
+      tags:
+      - Missions
+    put:
+      consumes:
+      - application/json
+      description: Update notes or completion status for a target
+      parameters:
+      - description: Target ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Target update body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.TargetUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Target'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update target
+      tags:
+      - Missions
+swagger: "2.0"

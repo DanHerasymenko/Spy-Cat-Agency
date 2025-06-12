@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  spy_service:
+    build:
+      context: .
+      target: dev
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    container_name: spy_service
+    volumes:
+      - ./cmd:/app/cmd
+      - ./internal:/app/internal
+      - ./migrations:/app/migrations
+    ports:
+      - ${APP_LOCAL_PORT}:${APP_CONTAINER_PORT}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17.4
+    container_name: ${POSTGRES_CONTAINER_HOST}
+    restart: no
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - ${POSTGRES_LOCAL_PORT}:${DB_PORT}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    tty: true
+    stdin_open: true
