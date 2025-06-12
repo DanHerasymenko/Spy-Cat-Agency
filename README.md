@@ -5,7 +5,7 @@
 **Default swagger link:** [http://localhost:8082/swagger/index.html#/](http://localhost:8082/swagger/index.html#/)
 
 **Default PostgreSQL connection URL (internal Docker network):**  
-`postgres://spycat:spycat@postgres:5432/spycat?sslmode=disable`
+`postgres://spycat:spycat@postgres:5435/spycat?sslmode=disable`
 
 
 This application implements a management system for the Spy Cat Agency, where cat agents are assigned espionage missions with specific targets. The system supports full CRUD operations for spy cats, missions, and targets, enforces business logic rules, and integrates with external services like TheCatAPI to validate cat breeds.
